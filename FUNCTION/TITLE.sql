@@ -1,0 +1,47 @@
+/*
+	DROP FUNCTION IF EXISTS TITLE
+*/
+
+/*
+	Essa função retorna uma cadeia de texto titularizada; semelhante
+	ao método str.title() do Python. Por exemplo:
+
+	SELECT dbo.TITLE('aLgUm TeXtO') AS [SAMPLE]
+
+	SAMPLE
+	-----------
+	Algum Texto
+*/
+
+CREATE FUNCTION TITLE (@STRING AS varchar(4000))
+RETURNS varchar(4000)
+AS
+BEGIN
+	DECLARE @OUTPUT AS varchar(4000)
+	DECLARE @CHAR AS char(1)
+	DECLARE @PATTERN AS char(8) = '[A-Za-z]'
+	DECLARE @INDEX AS smallint = 1
+	DECLARE @LENGTH AS smallint = LEN(@STRING)
+	DECLARE @IS_FIRST_LETTER AS bit = 1
+
+	WHILE @INDEX <= @LENGTH
+	BEGIN
+		SET @CHAR = SUBSTRING(@STRING, @INDEX, 1)
+
+		IF @IS_FIRST_LETTER = 1
+		BEGIN
+			SET @OUTPUT = CONCAT(@OUTPUT, UPPER(@CHAR))
+			SET @IS_FIRST_LETTER = 0
+		END
+		ELSE
+		BEGIN
+			SET @OUTPUT = CONCAT(@OUTPUT, LOWER(@CHAR))
+		END
+
+		IF @CHAR NOT LIKE @PATTERN SET @IS_FIRST_LETTER = 1
+
+		SET @INDEX = @INDEX + 1
+	END
+
+	RETURN COALESCE(@OUTPUT, @STRING)
+END
